@@ -333,8 +333,6 @@ function PortScene({ progress, prewarm = false }: { progress: number; prewarm?: 
   const { scene: shipScene } = useLazyGLB('/models/cargo_ship.glb')
   const { scene: craneScene } = useLazyGLB('/models/hero_prop_-_harbour_crane.glb')
 
-
-
   // Early WebGL GPU pre-warming: compile shaders & buffers while invisible
   if (prewarm && alpha <= 0.001) {
     return (
