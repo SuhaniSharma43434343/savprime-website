@@ -333,6 +333,8 @@ function PortScene({ progress, prewarm = false }: { progress: number; prewarm?: 
   const { scene: shipScene } = useLazyGLB('/models/cargo_ship.glb')
   const { scene: craneScene } = useLazyGLB('/models/hero_prop_-_harbour_crane.glb')
 
+
+
   // Early WebGL GPU pre-warming: compile shaders & buffers while invisible
   if (prewarm && alpha <= 0.001) {
     return (
@@ -345,63 +347,21 @@ function PortScene({ progress, prewarm = false }: { progress: number; prewarm?: 
 
   return (
     <group visible={alpha > 0.01} position={[0, 0.35, 0]}>
-      {/* Sleek quayside wharf concrete deck */}
-      <mesh position={[-0.4, -0.55, 0.4]} receiveShadow>
-        <boxGeometry args={[14, 0.22, 4.6]} />
-        <meshStandardMaterial color="#1a1c22" roughness={0.88} metalness={0.12} transparent opacity={alpha * 0.95} />
-      </mesh>
-
-      {/* Quayside crane steel runway tracks */}
-      <mesh position={[-0.4, -0.435, -0.1]}>
-        <boxGeometry args={[13.8, 0.012, 0.08]} />
-        <meshStandardMaterial color="#3d404a" roughness={0.3} metalness={0.85} transparent opacity={alpha * 0.9} />
-      </mesh>
-      <mesh position={[-0.4, -0.435, -0.7]}>
-        <boxGeometry args={[13.8, 0.012, 0.08]} />
-        <meshStandardMaterial color="#3d404a" roughness={0.3} metalness={0.85} transparent opacity={alpha * 0.9} />
-      </mesh>
-
-      {/* Berth edge gold hazard caution stripe */}
-      <mesh position={[-0.4, -0.435, -1.86]}>
-        <boxGeometry args={[13.8, 0.012, 0.12]} />
-        <meshBasicMaterial color="#c9a962" transparent opacity={alpha * 0.85} />
-      </mesh>
-
-      {/* Cast steel mooring bollards along the quay wall */}
-      {[-4.5, -2.5, -0.5, 1.5, 3.5, 5.5].map((x, i) => (
-        <group key={i} position={[x, -0.38, -1.78]}>
-          <mesh>
-            <cylinderGeometry args={[0.04, 0.048, 0.12, 12]} />
-            <meshStandardMaterial color="#22242a" roughness={0.4} metalness={0.8} transparent opacity={alpha * 0.9} />
-          </mesh>
-          <mesh position={[0, 0.065, 0]}>
-            <cylinderGeometry args={[0.065, 0.065, 0.03, 12]} />
-            <meshStandardMaterial color="#2e313a" roughness={0.3} metalness={0.85} transparent opacity={alpha * 0.9} />
-          </mesh>
-        </group>
-      ))}
-
-      {/* Nocturnal harbor water — placed only behind the quay wall at water level, dark & non-intrusive */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.62, -4.5]} receiveShadow>
-        <planeGeometry args={[28, 16]} />
-        <meshStandardMaterial color="#07090e" roughness={0.2} metalness={0.65} transparent opacity={alpha * 0.6} />
-      </mesh>
-
-      {/* Harbour crane — stands proud on dock rails, bottom-aligned, boom extending towards vessel */}
+      {/* Harbour crane — primary PORT landmark */}
       {craneScene && (
-        <group position={[-0.85, -0.44, -0.4]} rotation={[0, 0.35, 0]}>
-          <GroundAlignedModel object={craneScene} targetHeight={1.2} />
+        <group position={[-0.2, -0.25, -0.6]} rotation={[0, 0.3, 0]}>
+          <GroundAlignedModel object={craneScene} targetHeight={1.5} />
         </group>
       )}
 
-      {/* Cargo ship — berthed alongside the quay wall in harbor water */}
+      {/* Cargo ship — berthed alongside */}
       {shipScene && (
-        <group position={[0.95, -0.60, -1.85]} rotation={[0, 0.02, 0]}>
+        <group position={[0.6, -0.35, -1.85]} rotation={[0, 0.02, 0]}>
           <ShipModel object={shipScene} targetLength={2.5} waterlineRatio={0.45} />
         </group>
       )}
 
-      {/* Industrial high-power terminal lighting */}
+      {/* Industrial terminal lighting */}
       <ambientLight color="#181a22" intensity={0.8} />
       <pointLight color="#ffe8cc" intensity={2.4} position={[-2.2, 4.2, 1.2]} distance={20} />
       <directionalLight color="#ffffff" intensity={1.1} position={[4.0, 3.5, -4.0]} />

@@ -216,9 +216,17 @@ function WireframeGlobe({ alpha }: { alpha: number }) {
       </mesh>
       {/* route arcs */}
       {arcs.map((geo, i) => (
-        <line key={i} geometry={geo}>
-          <lineBasicMaterial color="#c9a962" transparent opacity={alpha * 0.5} />
-        </line>
+        <primitive
+          key={i}
+          object={new THREE.Line(
+            geo,
+            new THREE.LineBasicMaterial({
+              color: '#c9a962',
+              transparent: true,
+              opacity: alpha * 0.5,
+            })
+          )}
+        />
       ))}
       {/* port markers */}
       {ports.map((pos, i) => (
@@ -269,16 +277,23 @@ function Reveal({
   progress,
   start,
   end,
+  immediate = false,
 }: {
   children: React.ReactNode
   progress: number
   start: number
   end: number
+  immediate?: boolean
 }) {
   const raw = progress < start ? 0 : progress > end ? 1 : (progress - start) / (end - start)
-  const t = raw < 0.5 ? 2 * raw * raw : 1 - ((-2 * raw + 2) ** 2) / 2
+  // Smoother step — avoids the inversion bug where mid-range eased values go negative
+  const t = raw * raw * (3 - 2 * raw)
+
+  // When immediate, show content right away so direct navigation never shows a black screen
+  const opacity = immediate ? Math.max(0.15, t) : t
+  const y = (1 - t) * 24
   return (
-    <div style={{ opacity: t, transform: `translateY(${(1 - t) * 24}px)` }}>
+    <div style={{ opacity, transform: `translateY(${y}px)` }}>
       {children}
     </div>
   )
@@ -324,7 +339,7 @@ export default function AboutPage() {
         {/* ── HERO ─────────────────────────────────────────────── */}
         <section className="relative h-screen flex items-center">
           <div className="max-w-7xl mx-auto px-8 md:px-12 lg:px-16">
-            <Reveal progress={progress} start={0} end={0.08}>
+            <Reveal progress={progress} start={0} end={0.08} immediate>
               <span className="section-label block mb-6">SAV PRIME — ABOUT</span>
               <h1 className="hero-title text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-[-0.03em] max-w-3xl">
                 Moving materials<br />
