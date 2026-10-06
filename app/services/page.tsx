@@ -162,6 +162,77 @@ export default function ServicesPage() {
         </div>
       </div>
 
+      {/* Floating service detail popup */}
+      <div
+        className="hidden lg:block fixed z-20 pointer-events-none"
+        style={{ bottom: '48px', right: '24px', maxWidth: '260px' }}
+        key={activeService + '-popup'}
+      >
+        <div
+          className="px-5 py-4"
+          style={{
+            background: 'rgba(8,8,10,0.92)',
+            border: '1px solid rgba(201,169,98,0.12)',
+            backdropFilter: 'blur(20px)',
+            animation: 'servicePopupIn 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          }}
+        >
+          {/* Service number */}
+          <span
+            className="font-mono text-[9px] tracking-[0.3em] uppercase block mb-2"
+            style={{ color: 'rgba(201,169,98,0.45)' }}
+          >
+            {meta.num} // {activeService.replace('_', ' ')}
+          </span>
+
+          {/* Title */}
+          <h3
+            className="font-['Playfair_Display'] text-white leading-[1.1] mb-2"
+            style={{ fontSize: 'clamp(0.95rem, 1.1vw, 1.15rem)', letterSpacing: '-0.01em' }}
+          >
+            {meta.title}
+          </h3>
+
+          {/* Description */}
+          <p
+            className="text-white/40 text-[11px] font-light leading-relaxed mb-3"
+            style={{ lineHeight: '1.6' }}
+          >
+            {meta.description}
+          </p>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1.5">
+            {meta.tags.slice(0, 3).map((tag) => (
+              <span
+                key={tag}
+                className="font-mono text-[8px] tracking-[0.15em] uppercase px-1.5 py-0.5"
+                style={{
+                  color: 'rgba(201,169,98,0.4)',
+                  border: '1px solid rgba(201,169,98,0.08)',
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Popup entrance keyframes injected once */}
+      <style jsx global>{`
+        @keyframes servicePopupIn {
+          from {
+            opacity: 0;
+            transform: translateY(12px) scale(0.97);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `}</style>
+
       {/* Right panel: service selector + voyage simulator */}
       <div className="hidden lg:block fixed top-0 right-0 h-screen overflow-y-auto pointer-events-auto" style={{ width: '380px', borderLeft: '1px solid rgba(201,169,98,0.07)', background: 'rgba(7,7,9,0.85)', backdropFilter: 'blur(24px)' }}>
         <VoyageSimulator activeService={activeService} />

@@ -101,11 +101,28 @@ function JourneyLine({ progress }: { progress: number }) {
         strokeDasharray={len}
         strokeDashoffset={len * (1 - draw)}
       />
-      {/* traveling dot */}
+      {/* traveling car */}
       {draw > 0.01 && (
-        <circle cx={dot.x} cy={dot.y} r="0.7" fill="#c9a962">
-          <animate attributeName="opacity" values="0.55;1;0.55" dur="2s" repeatCount="indefinite" />
-        </circle>
+        <g transform={`translate(${dot.x}, ${dot.y})`}>
+          {/* soft halo */}
+          <circle cx="0" cy="0" r="2.2" fill="rgba(201,169,98,0.12)">
+            <animate attributeName="r" values="2;2.6;2" dur="2.5s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.5;0.1;0.5" dur="2.5s" repeatCount="indefinite" />
+          </circle>
+          {/* body */}
+          <rect x="-2.4" y="-0.9" width="4.8" height="1.8" rx="0.7" fill="#c9a962" />
+          {/* cabin */}
+          <path d="M -0.4 -0.9 L 0.6 -1.55 Q 0.9 -1.7 1.2 -1.7 L 1.6 -1.7 Q 1.9 -1.7 1.9 -1.4 L 1.9 -0.9 Z" fill="#b8954e" />
+          {/* windshield */}
+          <path d="M -0.4 -0.9 L 0.6 -1.45 L 1.0 -1.45 L 1.0 -0.9 Z" fill="#1a1a2e" opacity="0.75" />
+          {/* rear window */}
+          <path d="M 1.4 -1.45 L 1.9 -1.45 L 1.9 -0.9 L 1.4 -0.9 Z" fill="#1a1a2e" opacity="0.6" />
+          {/* wheels */}
+          <circle cx="-1.3" cy="0.9" r="0.55" fill="#1a1a2e" />
+          <circle cx="1.3" cy="0.9" r="0.55" fill="#1a1a2e" />
+          {/* headlights */}
+          <circle cx="1.9" cy="-0.2" r="0.18" fill="#ffe4c4" opacity="0.9" />
+        </g>
       )}
     </svg>
   )

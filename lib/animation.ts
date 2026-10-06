@@ -88,9 +88,9 @@ export const CAMERA_PATHS: Record<SectionName, CameraKeyframe> = {
     lightIntensity: 2.1,
   },
   PORT: {
-    position: [0.35, 1.5, 5.5],
-    lookAt: [0.05, -0.05, -0.6],
-    fov: 48,
+    position: [0.35, 0.9, 7.5],
+    lookAt: [0.05, -0.35, -0.5],
+    fov: 50,
     fogColor: '#06070a',
     lightColor: '#ded8ce',
     lightIntensity: 2.3,

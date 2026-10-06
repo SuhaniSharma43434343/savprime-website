@@ -344,7 +344,7 @@ function PortScene({ progress, prewarm = false }: { progress: number; prewarm?: 
   }
 
   return (
-    <group visible={alpha > 0.01} position={[0, 0, 0]}>
+    <group visible={alpha > 0.01} position={[0, 0.35, 0]}>
       {/* Sleek quayside wharf concrete deck */}
       <mesh position={[-0.4, -0.55, 0.4]} receiveShadow>
         <boxGeometry args={[14, 0.22, 4.6]} />
@@ -390,7 +390,7 @@ function PortScene({ progress, prewarm = false }: { progress: number; prewarm?: 
       {/* Harbour crane — stands proud on dock rails, bottom-aligned, boom extending towards vessel */}
       {craneScene && (
         <group position={[-0.85, -0.44, -0.4]} rotation={[0, 0.35, 0]}>
-          <GroundAlignedModel object={craneScene} targetHeight={1.8} />
+          <GroundAlignedModel object={craneScene} targetHeight={1.2} />
         </group>
       )}
 

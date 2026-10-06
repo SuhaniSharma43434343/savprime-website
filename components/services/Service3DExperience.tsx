@@ -60,24 +60,41 @@ function lerpFrame(a: typeof SERVICE_FRAMES[string], b: typeof SERVICE_FRAMES[st
   return { outPos, outLook, outFov, outFogNear, outFogFar, outFogColor, outKeyIntensity, outBoost, keyLightPos: a.keyLightPos }
 }
 
-/* ─── Camera rig that smooths between service keyframes ────────────────── */
+/* ─── Camera rig — stabilized, no jitter ────────────────────────────────── */
 function CameraRig({ scrollProgress }: { scrollProgress: number }) {
   const camRef = useRef<THREE.PerspectiveCamera>(null)
-  const pos = useRef(new THREE.Vector3(-8.5, 2.0, -1.5))
-  const look = useRef(new THREE.Vector3(-12.5, 0.3, -2.0))
-  const fov = useRef(52)
-  const prevX = useRef(-8.5)
+  const smoothScroll = useRef(scrollProgress)
 
-  useFrame((state, delta) => {
+  // Smoothed scroll so camera doesn't react to every pixel of scroll noise
+  useEffect(() => {
+    let raf: number
+    const target = scrollProgress
+    const tick = () => {
+      smoothScroll.current += (target - smoothScroll.current) * 0.08
+      if (Math.abs(smoothScroll.current - target) < 0.0001) {
+        smoothScroll.current = target
+        return
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [scrollProgress])
+
+  useFrame((state) => {
     const cam = camRef.current
     if (!cam) return
-    const d = Math.min(0.06, Math.max(0.001, delta))
+
     const t = state.clock.elapsedTime
     const p = state.pointer
 
-    // Determine which service segment we're in
+    // Smoothed mouse for gentle parallax (no raw pointer jitter)
+    const mx = p.x * 0.06
+    const my = p.y * 0.04
+
+    // Determine service segment
     const segSize = 1 / SERVICE_ORDER.length
-    const rawIdx = scrollProgress / segSize
+    const rawIdx = smoothScroll.current / segSize
     const idx = Math.min(SERVICE_ORDER.length - 2, Math.max(0, Math.floor(rawIdx)))
     const segT = rawIdx - idx
 
@@ -85,34 +102,18 @@ function CameraRig({ scrollProgress }: { scrollProgress: number }) {
     const b = SERVICE_FRAMES[SERVICE_ORDER[idx + 1]]
     const frame = lerpFrame(a, b, segT)
 
-    // Mouse parallax + breathing
-    const mx = p.x * 0.12 + Math.sin(t * 0.35) * 0.015
-    const my = p.y * 0.08 + Math.cos(t * 0.3) * 0.012
-
+    // Target position: spline + parallax offset
     const targetPos = frame.outPos.clone().add(new THREE.Vector3(mx, my, 0))
-    const targetLook = frame.outLook.clone().add(new THREE.Vector3(mx * 0.3, my * 0.3, 0))
+    const targetLook = frame.outLook.clone().add(new THREE.Vector3(mx * 0.25, my * 0.25, 0))
 
-    pos.current.x = THREE.MathUtils.damp(pos.current.x, targetPos.x, 3.0, d)
-    pos.current.y = THREE.MathUtils.damp(pos.current.y, targetPos.y, 3.0, d)
-    pos.current.z = THREE.MathUtils.damp(pos.current.z, targetPos.z, 3.0, d)
-    cam.position.copy(pos.current)
-
-    look.current.x = THREE.MathUtils.damp(look.current.x, targetLook.x, 3.0, d)
-    look.current.y = THREE.MathUtils.damp(look.current.y, targetLook.y, 3.0, d)
-    look.current.z = THREE.MathUtils.damp(look.current.z, targetLook.z, 3.0, d)
-    cam.lookAt(look.current)
-
-    // Roll
-    const vx = (pos.current.x - prevX.current) / d
-    prevX.current = pos.current.x
-    cam.rotation.z = THREE.MathUtils.damp(cam.rotation.z, -THREE.MathUtils.clamp(vx * 0.008, -0.02, 0.02), 3.0, d)
+    // Stable lerp — fixed factor, no delta dependency, no roll
+    const ease = 0.04
+    cam.position.lerp(targetPos, ease)
+    cam.lookAt(targetLook)
 
     // FOV
-    fov.current = THREE.MathUtils.damp(fov.current, frame.outFov, 3.5, d)
-    if (Math.abs(cam.fov - fov.current) > 0.05) {
-      cam.fov = fov.current
-      cam.updateProjectionMatrix()
-    }
+    cam.fov = THREE.MathUtils.lerp(cam.fov, frame.outFov, ease)
+    cam.updateProjectionMatrix()
   })
 
   return <PerspectiveCamera ref={camRef} makeDefault position={[-8.5, 2.0, -1.5]} fov={52} near={0.1} far={80} />
